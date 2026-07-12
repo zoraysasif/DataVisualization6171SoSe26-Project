@@ -37,6 +37,20 @@ class ParallelCoordinates {
         
         d3.select("#reset-brushes").on("click", () => this.resetBrushes());
         
+        let expanded = false;
+        d3.select("#toggle-height-btn").on("click", () => {
+            expanded = !expanded;
+            
+            d3.select("#parallel-coords-container")
+                .style("height", expanded ? "700px" : "350px")
+                .style("transition", "height 0.3s ease");
+            
+            d3.select("#toggle-height-btn").text(expanded ? "Retract Height" : "Extend Height");
+            
+            this.redraw();
+            setTimeout(() => this.redraw(), 310);
+        });
+        
         // Create Y scales for each dimension
         this.dimensions.forEach(d => {
             this.y[d] = d3.scaleLinear()
@@ -141,8 +155,55 @@ class ParallelCoordinates {
     
     resetBrushes() {
         const self = this;
+        // Explicitly clear extents
+        this.dimensions.forEach(d => {
+            this.extents[d] = null;
+        });
+        // Visually clear brushes
         this.g.selectAll(".brush").each(function(d) {
             d3.select(this).call(self.y[d].brush.move, null);
+        });
+        // Force update
+        this.updateFilter();
+    }
+    
+    redraw() {
+        const bounds = this.container.node().getBoundingClientRect();
+        const width = bounds.width - this.margin.left - this.margin.right;
+        const height = bounds.height - this.margin.top - this.margin.bottom;
+        
+        this.x.range([0, width]);
+        
+        this.dimensions.forEach(d => {
+            this.y[d].range([height, 0]);
+        });
+        
+        // Update paths
+        this.background.attr("d", this.path.bind(this));
+        this.foreground.attr("d", this.path.bind(this));
+        
+        const self = this;
+        
+        // Update axes
+        this.g.selectAll(".dimension").attr("transform", d => `translate(${this.x(d)},0)`);
+        
+        this.g.selectAll(".axis").each(function(d) { 
+            d3.select(this).call(d3.axisLeft(self.y[d]).ticks(5)); 
+        });
+        
+        // Update brush extents
+        this.g.selectAll(".brush").each(function(d) {
+            self.y[d].brush.extent([[-8, 0], [8, height]]);
+            d3.select(this).call(self.y[d].brush);
+            
+            if (self.extents[d]) {
+                const maxYPix = self.y[d](self.extents[d][0]); 
+                const minYPix = self.y[d](self.extents[d][1]);
+                const selection = [maxYPix, minYPix].sort((a,b) => a-b);
+                d3.select(this).call(self.y[d].brush.move, selection);
+            } else {
+                d3.select(this).call(self.y[d].brush.move, null);
+            }
         });
     }
 }
