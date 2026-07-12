@@ -241,7 +241,7 @@ select:hover {
 
 /* Parallel Coordinates specific */
 .parallel-coords-card {
-    transition: min-height 0.3s ease, height 0.3s ease;
+    /* Remove buggy height transition */
 }
 
 .parallel-coords-card.expanded-card {
@@ -250,7 +250,7 @@ select:hover {
 
 .parallel-coords-card .chart-container {
     height: 350px;
-    transition: height 0.3s ease;
+    /* Remove buggy height transition */
 }
 
 .parallel-coords-card.expanded-card .chart-container {

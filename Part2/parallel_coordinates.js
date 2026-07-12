@@ -51,10 +51,8 @@ class ParallelCoordinates {
             
             d3.select("#toggle-height-btn").text(expanded ? "Retract Height" : "Extend Height");
             
-            // Execute redraw after CSS transition completes to snap axes into new height
-            setTimeout(() => {
-                this.redraw(expanded);
-            }, 310);
+            // Execute redraw synchronously
+            this.redraw(expanded);
         });
         
         // Create Y scales for each dimension
@@ -136,6 +134,9 @@ class ParallelCoordinates {
             .selectAll("rect")
             .attr("x", -8)
             .attr("width", 16);
+            
+        // Initial layout calculation to position headers and draw everything perfectly
+        this.redraw(false);
     }
     
     path(d) {
