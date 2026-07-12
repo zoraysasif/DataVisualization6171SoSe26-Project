@@ -47,19 +47,10 @@ class ParallelCoordinates {
             
             d3.select("#toggle-height-btn").text(expanded ? "Retract Height" : "Extend Height");
             
-            // Smoothly redraw during transition
-            let frames = 0;
-            const animate = () => {
+            // Wait for CSS transition to finish, then redraw axes and lines
+            setTimeout(() => {
                 this.redraw();
-                frames++;
-                if(frames < 20) {
-                    requestAnimationFrame(animate);
-                } else {
-                    // final snap
-                    setTimeout(() => this.redraw(), 50);
-                }
-            };
-            requestAnimationFrame(animate);
+            }, 310);
         });
         
         // Create Y scales for each dimension
@@ -166,19 +157,26 @@ class ParallelCoordinates {
     
     resetBrushes() {
         const self = this;
-        // Loop over each dimension
+        // 1. Clear logical extents
         this.dimensions.forEach(d => {
-            // Clear logical extent
             self.extents[d] = null;
-            
-            // Clear visual brush selection
-            const brushGroup = self.g.selectAll(".brush").filter(bd => bd === d);
-            if (!brushGroup.empty()) {
-                self.y[d].brush.move(brushGroup, null);
+        });
+
+        // 2. Clear visually via D3 brush API safely
+        this.g.selectAll(".brush").each(function(d) {
+            try {
+                self.y[d].brush.move(d3.select(this), null);
+            } catch(e) {
+                console.error(e);
             }
         });
-        // Force update filter
-        self.updateFilter();
+        
+        // 3. Brutal visual DOM wipe to guarantee boxes disappear
+        this.g.selectAll(".brush .selection").style("display", "none");
+        this.g.selectAll(".brush .handle").style("display", "none");
+
+        // 4. Force update filter
+        this.updateFilter();
     }
     
     redraw() {
@@ -205,8 +203,10 @@ class ParallelCoordinates {
             d3.select(this).call(d3.axisLeft(self.y[d]).ticks(5)); 
         });
         
-        // Update brush extents
+        // Temporarily disable brush events to prevent massive event firing loops
         this.g.selectAll(".brush").each(function(d) {
+            self.y[d].brush.on("brush start", null).on("end", null);
+            
             self.y[d].brush.extent([[-8, 0], [8, height]]);
             d3.select(this).call(self.y[d].brush);
             
@@ -217,7 +217,16 @@ class ParallelCoordinates {
                 d3.select(this).call(self.y[d].brush.move, selection);
             } else {
                 d3.select(this).call(self.y[d].brush.move, null);
+                d3.select(this).selectAll(".selection").style("display", "none");
+                d3.select(this).selectAll(".handle").style("display", "none");
             }
+            
+            // Re-enable events
+            self.y[d].brush
+                .on("brush start", self.brush.bind(self))
+                .on("end", self.brushEnd.bind(self));
         });
+        
+        this.updateFilter();
     }
 }
