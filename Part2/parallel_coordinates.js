@@ -41,16 +41,16 @@ class ParallelCoordinates {
         d3.select("#toggle-height-btn").on("click", () => {
             expanded = !expanded;
             
-            this.container
-                .style("height", expanded ? "700px" : "350px")
-                .style("transition", "height 0.3s ease");
+            // Forcefully change heights via D3 to ensure no CSS overrides
+            this.container.style("height", (expanded ? 700 : 350) + "px");
+            this.svg.style("height", (expanded ? 700 : 350) + "px");
+            
+            d3.select(".parallel-coords-card").style("min-height", (expanded ? 750 : 400) + "px");
             
             d3.select("#toggle-height-btn").text(expanded ? "Retract Height" : "Extend Height");
             
-            // Wait for CSS transition to finish, then redraw axes and lines
-            setTimeout(() => {
-                this.redraw();
-            }, 310);
+            // Execute redraw immediately to snap to the new exact pixel values
+            this.redraw(expanded);
         });
         
         // Create Y scales for each dimension
@@ -179,10 +179,13 @@ class ParallelCoordinates {
         this.updateFilter();
     }
     
-    redraw() {
+    redraw(expanded = false) {
         const bounds = this.container.node().getBoundingClientRect();
         const width = bounds.width - this.margin.left - this.margin.right;
-        const height = bounds.height - this.margin.top - this.margin.bottom;
+        
+        // Use explicit height instead of relying on DOM bounding boxes which might be delayed
+        const expectedTotalHeight = expanded ? 700 : 350;
+        const height = expectedTotalHeight - this.margin.top - this.margin.bottom;
         
         this.x.range([0, width]);
         
