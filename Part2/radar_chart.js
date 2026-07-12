@@ -53,7 +53,7 @@ class RadarChart {
             levelG.append("circle")
                 .attr("r", r)
                 .style("fill", "none")
-                .style("stroke", "rgba(255,255,255,0.1)")
+                .style("stroke", "rgba(0,0,0,0.15)")
                 .style("stroke-dasharray", "4,4");
         }
     }
@@ -70,7 +70,7 @@ class RadarChart {
                 .attr("y1", 0)
                 .attr("x2", this.radiusScale(1) * Math.cos(angle - Math.PI/2))
                 .attr("y2", this.radiusScale(1) * Math.sin(angle - Math.PI/2))
-                .style("stroke", "rgba(255,255,255,0.2)")
+                .style("stroke", "rgba(0,0,0,0.2)")
                 .style("stroke-width", "1px");
                 
             // Draw axis label

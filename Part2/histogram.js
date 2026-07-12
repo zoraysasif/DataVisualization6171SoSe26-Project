@@ -1,7 +1,7 @@
 class ClusterHistogram {
     constructor(data) {
         this.container = d3.select("#histogram-container");
-        this.margin = {top: 20, right: 20, bottom: 40, left: 40};
+        this.margin = {top: 20, right: 20, bottom: 65, left: 40};
         
         this.init();
         this.render(data, false);
@@ -31,7 +31,20 @@ class ClusterHistogram {
             .domain(["0", "1", "2", "3", "4"]) // 5 clusters
             .padding(0.2);
             
-        this.xAxisG.call(d3.axisBottom(this.xScale).tickFormat(d => "Cluster " + d));
+        const clusterLabels = {
+            "0": "Balanced",
+            "1": "Max Strength",
+            "2": "High Cond.",
+            "3": "High Strength",
+            "4": "Max Cond."
+        };
+            
+        this.xAxisG.call(d3.axisBottom(this.xScale).tickFormat(d => clusterLabels[d]))
+            .selectAll("text")
+            .attr("transform", "rotate(-40)")
+            .style("text-anchor", "end")
+            .attr("dx", "-.8em")
+            .attr("dy", ".15em");
             
         this.yScale = d3.scaleLinear().range([this.height, 0]);
     }
