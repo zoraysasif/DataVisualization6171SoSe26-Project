@@ -203,12 +203,9 @@ class ParallelCoordinates {
     }
     
     redraw(expanded = false) {
-        const bounds = this.container.node().getBoundingClientRect();
-        const width = bounds.width - this.margin.left - this.margin.right;
-        
-        // Use explicit height instead of relying on DOM bounding boxes which might be delayed
-        const expectedTotalHeight = expanded ? 700 : 350;
-        const height = expectedTotalHeight - this.margin.top - this.margin.bottom;
+        const svgBounds = this.svg.node().getBoundingClientRect();
+        const width = svgBounds.width - this.margin.left - this.margin.right;
+        const height = svgBounds.height - this.margin.top - this.margin.bottom;
         
         this.x.range([0, width]);
         
