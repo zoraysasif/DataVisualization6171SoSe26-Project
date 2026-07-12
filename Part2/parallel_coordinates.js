@@ -35,6 +35,8 @@ class ParallelCoordinates {
         
         this.x.range([0, width]);
         
+        d3.select("#reset-brushes").on("click", () => this.resetBrushes());
+        
         // Create Y scales for each dimension
         this.dimensions.forEach(d => {
             this.y[d] = d3.scaleLinear()
@@ -135,5 +137,12 @@ class ParallelCoordinates {
         
         // Notify the dashboard controller
         updateGlobalFilter(filtered);
+    }
+    
+    resetBrushes() {
+        const self = this;
+        this.g.selectAll(".brush").each(function(d) {
+            d3.select(this).call(self.y[d].brush.move, null);
+        });
     }
 }

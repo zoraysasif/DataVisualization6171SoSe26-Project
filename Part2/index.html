@@ -36,9 +36,12 @@
     <div class="dashboard-grid">
         <!-- Top Full Width: Parallel Coordinates -->
         <div class="card parallel-coords-card glass-card">
-            <div class="card-header">
-                <h2>Parallel Coordinates</h2>
-                <span class="subtitle">Brush axes to filter candidates globally.</span>
+            <div class="card-header" style="flex-direction: row; justify-content: space-between; align-items: center;">
+                <div>
+                    <h2>Parallel Coordinates</h2>
+                    <span class="subtitle">Brush axes to filter candidates globally.</span>
+                </div>
+                <button id="reset-brushes" class="reset-btn">Clear Brushes</button>
             </div>
             <div id="parallel-coords-container" class="chart-container"></div>
         </div>
