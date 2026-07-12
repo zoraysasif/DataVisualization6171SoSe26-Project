@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Alloy Discovery Dashboard</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <script src="parallel_coordinates.js"></script>
+    <script src="scatter_plot.js"></script>
+    <script src="radar_chart.js"></script>
+    <script src="histogram.js"></script>
+    <script src="dashboard.js"></script>
+</head>
+<body onload="initDashboard()">
+    <header class="glass-header">
+        <div class="header-content">
+            <h1>Alloy Discovery Dashboard</h1>
+            <p>Explore composition-microstructure-properties relationships to discover optimal sustainable alloys.</p>
+        </div>
+        <div class="header-stats">
+            <div class="stat-box">
+                <span class="stat-label">Total Candidates</span>
+                <span class="stat-value" id="total-count">...</span>
+            </div>
+            <div class="stat-box">
+                <span class="stat-label">Filtered</span>
+                <span class="stat-value" id="filtered-count">...</span>
+            </div>
+        </div>
+    </header>
+    
+    <div class="dashboard-grid">
+        <!-- Top Full Width: Parallel Coordinates -->
+        <div class="card parallel-coords-card glass-card">
+            <div class="card-header">
+                <h2>Parallel Coordinates</h2>
+                <span class="subtitle">Brush axes to filter candidates globally.</span>
+            </div>
+            <div id="parallel-coords-container" class="chart-container"></div>
+        </div>
+        
+        <!-- Bottom Row: 3 columns -->
+        <div class="bottom-row">
+            <div class="card scatter-plot-card glass-card">
+                <div class="card-header">
+                    <h2>Interactive Scatter Plot</h2>
+                    <div class="controls">
+                        <label>X: <select id="scatterX"></select></label>
+                        <label>Y: <select id="scatterY"></select></label>
+                    </div>
+                </div>
+                <div id="scatter-plot-container" class="chart-container"></div>
+            </div>
+            
+            <div class="card radar-chart-card glass-card">
+                <div class="card-header">
+                    <h2>Radar Chart Comparison</h2>
+                    <span class="subtitle">Select candidates from scatter plot to compare.</span>
+                </div>
+                <div id="radar-chart-container" class="chart-container"></div>
+                <div id="radar-legend" class="legend-container"></div>
+            </div>
+            
+            <div class="card histogram-card glass-card">
+                <div class="card-header">
+                    <h2>Cluster Distribution</h2>
+                    <span class="subtitle">Distribution of candidates across KMeans clusters.</span>
+                </div>
+                <div id="histogram-container" class="chart-container"></div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
