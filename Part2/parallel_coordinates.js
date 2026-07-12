@@ -2,7 +2,7 @@ class ParallelCoordinates {
     constructor(data) {
         this.data = data;
         this.container = d3.select("#parallel-coords-container");
-        this.margin = {top: 30, right: 30, bottom: 10, left: 30};
+        this.margin = {top: 60, right: 30, bottom: 10, left: 30};
         
         // Setup SVG
         this.svg = this.container.append("svg")
@@ -12,11 +12,16 @@ class ParallelCoordinates {
         this.g = this.svg.append("g")
             .attr("transform", `translate(${this.margin.left},${this.margin.top})`);
             
-        // Selected dimensions
-        this.dimensions = [
-            "KS1295[%]", "6082[%]", "2024[%]", "bat-box[%]", "3003[%]", "4032[%]",
-            "YS(MPa)", "hardness(Vickers)", "Density(g/cm3)", "Therm.conductivity(W/(mK))"
+        this.axisGroups = [
+            { name: "Mixed Composition [wt.%]", columns: ["Si", "Cu", "Mg", "Fe"] },
+            { name: "Manufacturability", columns: ["CSC", "delta_T"] },
+            { name: "Microstructure", columns: ["Vf_DIAMOND_A4"] },
+            { name: "Mechanical Properties", columns: ["YS(MPa)", "hardness(Vickers)"] },
+            { name: "Thermo-Physical Properties", columns: ["Therm.conductivity(W/(mK))", "Linear thermal expansion (1/K)(20.0-300.0degC)"] }
         ];
+        
+        // Flatten for the rest of the code
+        this.dimensions = this.axisGroups.flatMap(g => g.columns);
         
         this.y = {};
         this.x = d3.scalePoint().domain(this.dimensions);
@@ -81,6 +86,25 @@ class ParallelCoordinates {
             .style("stroke", d => clusterColorScale(d.Cluster))
             .style("stroke-opacity", 0.4)
             .style("stroke-width", 1.5);
+            
+        // Add axis group headers
+        this.groupHeaders = this.g.selectAll(".group-header")
+            .data(this.axisGroups)
+            .enter().append("g")
+            .attr("class", "group-header");
+            
+        this.groupHeaders.append("rect")
+            .attr("class", "group-rect")
+            .style("fill", "#0284c7")
+            .style("rx", 4);
+            
+        this.groupHeaders.append("text")
+            .attr("class", "group-text")
+            .style("text-anchor", "middle")
+            .style("fill", "#ffffff")
+            .style("font-size", "11px")
+            .style("font-weight", "600")
+            .text(d => d.name);
             
         // Add a group element for each dimension
         const g = this.g.selectAll(".dimension")
@@ -196,6 +220,26 @@ class ParallelCoordinates {
         this.foreground.attr("d", this.path.bind(this));
         
         const self = this;
+        
+        // Update group headers positioning
+        this.groupHeaders.selectAll("rect")
+            .attr("x", d => {
+                if(d.columns.length === 1) return this.x(d.columns[0]) - 45;
+                return this.x(d.columns[0]) - 15;
+            })
+            .attr("y", -45)
+            .attr("width", d => {
+                if (d.columns.length === 1) return 90;
+                return this.x(d.columns[d.columns.length - 1]) - this.x(d.columns[0]) + 30;
+            })
+            .attr("height", 20);
+            
+        this.groupHeaders.selectAll("text")
+            .attr("x", d => {
+                if (d.columns.length === 1) return this.x(d.columns[0]);
+                return this.x(d.columns[0]) + (this.x(d.columns[d.columns.length - 1]) - this.x(d.columns[0])) / 2;
+            })
+            .attr("y", -31);
         
         // Update axes
         this.g.selectAll(".dimension").attr("transform", d => `translate(${this.x(d)},0)`);

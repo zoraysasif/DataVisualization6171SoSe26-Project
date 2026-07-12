@@ -16,6 +16,9 @@ df = df.fillna(0)
 vf_columns = [col for col in df.columns if col.startswith('Vf_')]
 df['Total_Vf_Phases'] = df[vf_columns].sum(axis=1)
 
+# Clean column names to avoid encoding issues with degree symbols in Javascript
+df.columns = [c.replace('°', 'deg') for c in df.columns]
+
 # Perform KMeans clustering based on key inputs and properties
 features_for_clustering = [
     'YS(MPa)', 'hardness(Vickers)', 'Density(g/cm3)', 'Therm.conductivity(W/(mK))',
