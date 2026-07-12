@@ -27,11 +27,21 @@ features_for_clustering = [
 
 print("Applying KMeans clustering...")
 kmeans = KMeans(n_clusters=5, random_state=42)
+
+# De-fragment the dataframe to prevent silent failures in Pandas
+df = df.copy()
+
 df['Cluster'] = kmeans.fit_predict(df[features_for_clustering])
 
 print("Sampling dataset to 3000 rows...")
 # Sample the dataset to 3000 rows, preserving the cluster distribution
-sampled_df = df.groupby('Cluster', group_keys=False).apply(lambda x: x.sample(min(len(x), 600), random_state=42))
+# The safest way is to sample indices and then loc them
+sampled_indices = []
+for cluster_id in range(5):
+    cluster_data = df[df['Cluster'] == cluster_id]
+    sampled_indices.extend(cluster_data.sample(min(len(cluster_data), 600), random_state=42).index)
+
+sampled_df = df.loc[sampled_indices].copy()
 
 # Save the sampled dataframe to CSV for D3 to use
 output_file = 'dashboard_data.csv'

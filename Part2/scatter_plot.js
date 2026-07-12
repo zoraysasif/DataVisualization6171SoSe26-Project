@@ -18,8 +18,8 @@ class ScatterPlot {
     
     init() {
         // Populate selectors
-        const xSelect = d3.select("#scatter-x");
-        const ySelect = d3.select("#scatter-y");
+        const xSelect = d3.select("#scatterX");
+        const ySelect = d3.select("#scatterY");
         
         this.dims.forEach(d => {
             xSelect.append("option").attr("value", d).text(d);
