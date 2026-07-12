@@ -2,7 +2,7 @@ class ParallelCoordinates {
     constructor(data) {
         this.data = data;
         this.container = d3.select("#parallel-coords-container");
-        this.margin = {top: 30, right: 10, bottom: 10, left: 0};
+        this.margin = {top: 30, right: 30, bottom: 10, left: 30};
         
         // Setup SVG
         this.svg = this.container.append("svg")
@@ -68,7 +68,7 @@ class ParallelCoordinates {
             .enter().append("path")
             .attr("d", this.path.bind(this))
             .style("fill", "none")
-            .style("stroke", "rgba(255,255,255,0.02)");
+            .style("stroke", "rgba(0,0,0,0.03)");
 
         // Draw foreground lines (focus)
         this.foreground = this.g.append("g")
@@ -79,7 +79,7 @@ class ParallelCoordinates {
             .attr("d", this.path.bind(this))
             .style("fill", "none")
             .style("stroke", d => clusterColorScale(d.Cluster))
-            .style("stroke-opacity", 0.3)
+            .style("stroke-opacity", 0.4)
             .style("stroke-width", 1.5);
             
         // Add a group element for each dimension
