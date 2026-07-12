@@ -72,10 +72,10 @@ class ParallelCoordinates {
             .attr("class", "dimension")
             .attr("transform", d => `translate(${this.x(d)},0)`);
 
-        // Add an axis and title
+        const self = this;
         g.append("g")
             .attr("class", "axis")
-            .each(function(d) { d3.select(this).call(d3.axisLeft(this.y[d]).ticks(5)); }.bind(this))
+            .each(function(d) { d3.select(this).call(d3.axisLeft(self.y[d]).ticks(5)); })
             .append("text")
             .style("text-anchor", "middle")
             .attr("y", -9)
@@ -84,7 +84,6 @@ class ParallelCoordinates {
             .style("font-size", "11px");
 
         // Add and store a brush for each axis
-        const self = this;
         g.append("g")
             .attr("class", "brush")
             .each(function(d) {
