@@ -41,14 +41,25 @@ class ParallelCoordinates {
         d3.select("#toggle-height-btn").on("click", () => {
             expanded = !expanded;
             
-            d3.select("#parallel-coords-container")
+            this.container
                 .style("height", expanded ? "700px" : "350px")
                 .style("transition", "height 0.3s ease");
             
             d3.select("#toggle-height-btn").text(expanded ? "Retract Height" : "Extend Height");
             
-            this.redraw();
-            setTimeout(() => this.redraw(), 310);
+            // Smoothly redraw during transition
+            let frames = 0;
+            const animate = () => {
+                this.redraw();
+                frames++;
+                if(frames < 20) {
+                    requestAnimationFrame(animate);
+                } else {
+                    // final snap
+                    setTimeout(() => this.redraw(), 50);
+                }
+            };
+            requestAnimationFrame(animate);
         });
         
         // Create Y scales for each dimension
@@ -155,16 +166,19 @@ class ParallelCoordinates {
     
     resetBrushes() {
         const self = this;
-        // Explicitly clear extents
+        // Loop over each dimension
         this.dimensions.forEach(d => {
-            this.extents[d] = null;
+            // Clear logical extent
+            self.extents[d] = null;
+            
+            // Clear visual brush selection
+            const brushGroup = self.g.selectAll(".brush").filter(bd => bd === d);
+            if (!brushGroup.empty()) {
+                self.y[d].brush.move(brushGroup, null);
+            }
         });
-        // Visually clear brushes
-        this.g.selectAll(".brush").each(function(d) {
-            d3.select(this).call(self.y[d].brush.move, null);
-        });
-        // Force update
-        this.updateFilter();
+        // Force update filter
+        self.updateFilter();
     }
     
     redraw() {
