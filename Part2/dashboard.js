@@ -52,16 +52,16 @@ function updateGlobalFilter(brushedData) {
     document.getElementById('filtered-count').innerText = filteredData.length;
     
     // Update dependent charts
-    scatterPlot.update(filteredData);
-    clusterHistogram.update(filteredData);
+    if (scatterPlot) scatterPlot.update(filteredData);
+    if (clusterHistogram) clusterHistogram.update(filteredData);
     
     // Remove selected candidates that are no longer in filtered data
     const validIds = new Set(filteredData.map(d => d.id));
     const originalLen = selectedCandidates.length;
     selectedCandidates = selectedCandidates.filter(d => validIds.has(d.id));
     if(selectedCandidates.length !== originalLen) {
-        radarChart.update(selectedCandidates);
-        scatterPlot.highlightSelected(selectedCandidates);
+        if (radarChart) radarChart.update(selectedCandidates);
+        if (scatterPlot) scatterPlot.highlightSelected(selectedCandidates);
     }
 }
 
