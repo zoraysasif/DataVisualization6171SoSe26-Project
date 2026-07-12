@@ -106,15 +106,15 @@ body {
     display: flex;
     flex-direction: column;
     gap: 20px;
-    flex: 1;
+    flex: 1 0 auto;
 }
 
 .bottom-row {
     display: grid;
     grid-template-columns: 1fr 1fr 1fr;
     gap: 20px;
-    flex: 1;
-    min-height: 400px;
+    flex: none;
+    min-height: 550px;
 }
 
 /* Card Internals */
@@ -190,7 +190,7 @@ select:hover {
     flex: 1;
     position: relative;
     width: 100%;
-    min-height: 250px;
+    min-height: 400px;
 }
 
 /* D3 Elements Styling */
@@ -292,4 +292,26 @@ select:hover {
     width: 10px;
     height: 10px;
     border-radius: 50%;
+}
+
+/* Canvas & SVG Overlay for Parallel Coords and Scatter Plot */
+#parallel-coords-container canvas, #parallel-coords-container svg,
+#scatter-plot-container canvas, #scatter-plot-container svg {
+    position: absolute;
+    top: 15px; /* match container padding */
+    left: 15px;
+    width: calc(100% - 30px) !important;
+    height: calc(100% - 30px) !important;
+}
+
+#parallel-coords-container canvas {
+    pointer-events: none; /* Let SVG handle mouse events for brushing */
+}
+
+/* For Scatterplot, canvas handles hover events via quadtree */
+#scatter-plot-container canvas {
+    pointer-events: auto;
+}
+#scatter-plot-container svg {
+    pointer-events: none; /* Let canvas receive events, axes will not block */
 }

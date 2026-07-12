@@ -4,6 +4,12 @@ class ParallelCoordinates {
         this.container = d3.select("#parallel-coords-container");
         this.margin = {top: 60, right: 30, bottom: 10, left: 30};
         
+        // Setup Canvas
+        this.canvas = this.container.append("canvas")
+            .style("width", "100%")
+            .style("height", "100%");
+        this.ctx = this.canvas.node().getContext("2d");
+
         // Setup SVG
         this.svg = this.container.append("svg")
             .attr("width", "100%")
@@ -63,27 +69,7 @@ class ParallelCoordinates {
             this.extents[d] = null; // init brush extents
         });
         
-        // Draw background lines (context)
-        this.background = this.g.append("g")
-            .attr("class", "background")
-            .selectAll("path")
-            .data(this.data)
-            .enter().append("path")
-            .attr("d", this.path.bind(this))
-            .style("fill", "none")
-            .style("stroke", "rgba(0,0,0,0.03)");
-
-        // Draw foreground lines (focus)
-        this.foreground = this.g.append("g")
-            .attr("class", "foreground")
-            .selectAll("path")
-            .data(this.data)
-            .enter().append("path")
-            .attr("d", this.path.bind(this))
-            .style("fill", "none")
-            .style("stroke", d => clusterColorScale(d.Cluster))
-            .style("stroke-opacity", 0.4)
-            .style("stroke-width", 1.5);
+        // Removed SVG path drawing, will draw on canvas instead in redraw()
             
         // Add axis group headers
         this.groupHeaders = this.g.selectAll(".group-header")
@@ -112,6 +98,14 @@ class ParallelCoordinates {
             .attr("transform", d => `translate(${this.x(d)},0)`);
 
         const self = this;
+        const shortNames = {
+            "Therm.conductivity(W/(mK))": "Cond. (W/mK)",
+            "Linear thermal expansion (1/K)(20.0-300.0degC)": "Therm. Exp.",
+            "hardness(Vickers)": "Hardness (HV)",
+            "YS(MPa)": "YS (MPa)",
+            "Vf_DIAMOND_A4": "Vf_Diamond"
+        };
+
         g.append("g")
             .attr("class", "axis")
             .each(function(d) { d3.select(this).call(d3.axisLeft(self.y[d]).ticks(5)); })
@@ -119,7 +113,7 @@ class ParallelCoordinates {
             .attr("class", "axis-title")
             .style("text-anchor", "middle")
             .attr("y", -9)
-            .text(d => d);
+            .text(d => shortNames[d] || d);
 
         // Add and store a brush for each axis
         g.append("g")
@@ -139,10 +133,56 @@ class ParallelCoordinates {
         this.redraw(false);
     }
     
-    path(d) {
-        return d3.line()(this.dimensions.map(p => [this.x(p), this.y[p](d[p])]));
+    drawLines(filteredData) {
+        const bounds = this.canvas.node().getBoundingClientRect();
+        // Setup high-DPI canvas
+        const dpr = window.devicePixelRatio || 1;
+        this.canvas.attr("width", bounds.width * dpr).attr("height", bounds.height * dpr);
+        this.ctx.scale(dpr, dpr);
+        this.ctx.clearRect(0, 0, bounds.width, bounds.height);
+
+        // Transform for margin
+        this.ctx.save();
+        this.ctx.translate(this.margin.left, this.margin.top);
+
+        // Draw background (unfiltered context)
+        this.ctx.beginPath();
+        this.data.forEach(d => {
+            this.dimensions.forEach((p, i) => {
+                const x = this.x(p);
+                const y = this.y[p](d[p]);
+                if (i === 0) this.ctx.moveTo(x, y);
+                else this.ctx.lineTo(x, y);
+            });
+        });
+        this.ctx.strokeStyle = "rgba(0,0,0,0.015)";
+        this.ctx.lineWidth = 1;
+        this.ctx.stroke();
+
+        // Draw foreground (filtered context)
+        // Group by cluster to minimize strokeStyle changes
+        const groups = d3.group(filteredData, d => d.Cluster);
+        
+        for (const [cluster, clusterData] of groups) {
+            this.ctx.beginPath();
+            clusterData.forEach(d => {
+                this.dimensions.forEach((p, i) => {
+                    const x = this.x(p);
+                    const y = this.y[p](d[p]);
+                    if (i === 0) this.ctx.moveTo(x, y);
+                    else this.ctx.lineTo(x, y);
+                });
+            });
+            const color = d3.color(clusterColorScale(cluster));
+            color.opacity = 0.1;
+            this.ctx.strokeStyle = color.toString();
+            this.ctx.lineWidth = 1;
+            this.ctx.stroke();
+        }
+
+        this.ctx.restore();
     }
-    
+
     brush(event, d) {
         if(event.selection) {
             this.extents[d] = event.selection.map(this.y[d].invert, this.y[d]);
@@ -164,15 +204,16 @@ class ParallelCoordinates {
         const extents = activeDimensions.map(p => this.extents[p]);
         
         let filtered = [];
-        this.foreground.style("display", d => {
+        this.data.forEach(d => {
             const isActive = activeDimensions.every((p, i) => {
                 const val = d[p];
                 // Invert array because extent[0] is max value due to Y axis going top to bottom
                 return extents[i][1] <= val && val <= extents[i][0];
             });
             if(isActive) filtered.push(d);
-            return isActive ? null : "none";
         });
+        
+        this.drawLines(filtered);
         
         // Notify the dashboard controller
         updateGlobalFilter(filtered);
@@ -213,9 +254,7 @@ class ParallelCoordinates {
             this.y[d].range([height, 0]);
         });
         
-        // Update paths
-        this.background.attr("d", this.path.bind(this));
-        this.foreground.attr("d", this.path.bind(this));
+        // Draw lines on canvas is handled by updateFilter at the end of redraw
         
         const self = this;
         

@@ -33,13 +33,13 @@ df = df.copy()
 
 df['Cluster'] = kmeans.fit_predict(df[features_for_clustering])
 
-print("Sampling dataset to 3000 rows...")
-# Sample the dataset to 3000 rows, preserving the cluster distribution
+print("Sampling dataset to 1000 rows...")
+# Sample the dataset to 100000 rows, preserving the cluster distribution
 # The safest way is to sample indices and then loc them
 sampled_indices = []
 for cluster_id in range(5):
     cluster_data = df[df['Cluster'] == cluster_id]
-    sampled_indices.extend(cluster_data.sample(min(len(cluster_data), 600), random_state=42).index)
+    sampled_indices.extend(cluster_data.sample(min(len(cluster_data), 100000), random_state=42).index)
 
 sampled_df = df.loc[sampled_indices].copy()
 
