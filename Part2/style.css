@@ -201,14 +201,30 @@ select:hover {
 
 /* D3 Elements Styling */
 .axis text {
-    fill: var(--text-secondary);
-    font-size: 10px;
+    fill: #e2e8f0;
+    font-size: 11px;
+    font-weight: 500;
     font-family: 'Inter', sans-serif;
+    text-shadow: 0px 1px 3px rgba(0,0,0,0.8);
 }
 
-.axis path, .axis line {
+.axis .axis-title {
+    fill: #f8fafc;
+    font-size: 14px;
+    font-weight: 700;
+    text-shadow: 0px 2px 5px rgba(0,0,0,1);
+}
+
+.axis path {
     fill: none;
-    stroke: rgba(255, 255, 255, 0.15);
+    stroke: rgba(255, 255, 255, 0.5);
+    stroke-width: 1.5px;
+    shape-rendering: crispEdges;
+}
+
+.axis line {
+    fill: none;
+    stroke: rgba(255, 255, 255, 0.25);
     shape-rendering: crispEdges;
 }
 
@@ -230,8 +246,21 @@ select:hover {
 }
 
 /* Parallel Coordinates specific */
+.parallel-coords-card {
+    transition: min-height 0.3s ease, height 0.3s ease;
+}
+
+.parallel-coords-card.expanded-card {
+    min-height: 800px;
+}
+
 .parallel-coords-card .chart-container {
     height: 350px;
+    transition: height 0.3s ease;
+}
+
+.parallel-coords-card.expanded-card .chart-container {
+    height: 700px;
 }
 
 .brush .extent {

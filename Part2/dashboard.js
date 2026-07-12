@@ -5,13 +5,14 @@ let selectedCandidates = []; // For radar chart
 // Chart instances
 let parallelCoords, scatterPlot, radarChart, clusterHistogram;
 
-// Shared Color scale for clusters
+// Shared Color scale for clusters optimized for dark background
 const clusterColorScale = d3.scaleOrdinal()
     .domain([0, 1, 2, 3, 4])
-    .range(["#ff595e", "#ffca3a", "#8ac926", "#1982c4", "#6a4c93"]);
+    .range(["#00f5d4", "#f15bb5", "#fee440", "#00bbf9", "#9b5de5"]);
 
-// A shared color scale for selected candidates (up to 5)
-const candidateColorScale = d3.scaleOrdinal(d3.schemeSet1);
+// A shared color scale for selected candidates (up to 5) with high contrast
+const candidateColorScale = d3.scaleOrdinal()
+    .range(["#ff3366", "#20e2e2", "#ffc300", "#c77dff", "#06d6a0"]);
 
 function initDashboard() {
     // Append tooltip div to body

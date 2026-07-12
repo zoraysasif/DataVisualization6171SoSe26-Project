@@ -41,16 +41,15 @@ class ParallelCoordinates {
         d3.select("#toggle-height-btn").on("click", () => {
             expanded = !expanded;
             
-            // Forcefully change heights via D3 to ensure no CSS overrides
-            this.container.style("height", (expanded ? 700 : 350) + "px");
-            this.svg.style("height", (expanded ? 700 : 350) + "px");
-            
-            d3.select(".parallel-coords-card").style("min-height", (expanded ? 750 : 400) + "px");
+            // Toggle the CSS class which naturally expands the card and container via pure CSS
+            d3.select(".parallel-coords-card").classed("expanded-card", expanded);
             
             d3.select("#toggle-height-btn").text(expanded ? "Retract Height" : "Extend Height");
             
-            // Execute redraw immediately to snap to the new exact pixel values
-            this.redraw(expanded);
+            // Execute redraw after CSS transition completes to snap axes into new height
+            setTimeout(() => {
+                this.redraw(expanded);
+            }, 310);
         });
         
         // Create Y scales for each dimension
@@ -69,7 +68,7 @@ class ParallelCoordinates {
             .enter().append("path")
             .attr("d", this.path.bind(this))
             .style("fill", "none")
-            .style("stroke", "rgba(255,255,255,0.05)");
+            .style("stroke", "rgba(255,255,255,0.02)");
 
         // Draw foreground lines (focus)
         this.foreground = this.g.append("g")
@@ -80,7 +79,7 @@ class ParallelCoordinates {
             .attr("d", this.path.bind(this))
             .style("fill", "none")
             .style("stroke", d => clusterColorScale(d.Cluster))
-            .style("stroke-opacity", 0.4)
+            .style("stroke-opacity", 0.3)
             .style("stroke-width", 1.5);
             
         // Add a group element for each dimension
@@ -95,11 +94,10 @@ class ParallelCoordinates {
             .attr("class", "axis")
             .each(function(d) { d3.select(this).call(d3.axisLeft(self.y[d]).ticks(5)); })
             .append("text")
+            .attr("class", "axis-title")
             .style("text-anchor", "middle")
             .attr("y", -9)
-            .text(d => d)
-            .style("fill", "var(--text-secondary)")
-            .style("font-size", "11px");
+            .text(d => d);
 
         // Add and store a brush for each axis
         g.append("g")
